@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Imperial Arcade Hub</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at center, #0b0f1a, #05080f);
+    color: #e6f2ff;
+    overflow-x: hidden;
+  }
+  header {
+    text-align: center;
+    padding: 30px 20px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #39ffe4;
+    text-shadow: 0 0 12px #39ffe4;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    padding: 20px 40px 60px;
+    max-width: 1200px;
+    margin: auto;
+  }
+  .card {
+    background: rgba(15, 25, 40, 0.85);
+    border: 2px solid #1b2e50;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 12px rgba(57,255,228,0.15);
+  }
+  .card:hover {
+    border-color: #ff2e72;
+    box-shadow: 0 0 20px rgba(255,46,114,0.6);
+    transform: translateY(-6px) scale(1.03);
+  }
+  .card h2 {
+    margin: 12px 0;
+    font-size: 1.3rem;
+    color: #78a6ff;
+  }
+  .card p {
+    font-size: 0.9rem;
+    color: #cfe4ff;
+    line-height: 1.4;
+  }
+  .btn {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #39ffe4;
+    color: #39ffe4;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.25s;
+  }
+  .btn:hover {
+    background: #39ffe4;
+    color: #0b0f1a;
+  }
+</style>
+</head>
+<body>
+  <header>✨ Imperial Arcade ✨</header>
+  <div class="grid">
+    <div class="card">
+      <h2>Neon Strider</h2>
+      <p>Futuristic platformer. Double‑jump, dash, and collect shards in a neon skyline.</p>
+      <a href="neon_platformer.html" class="btn">Play</a>
+    </div>
+    <div class="card">
+      <h2>Cyber Racer</h2>
+      <p>High‑speed hover racing through neon tunnels. Dodge, drift, and boost to victory.</p>
+      <a href="cyber_racer.html" class="btn">Play</a>
+    </div>
+    <div class="card">
+      <h2>Drone Defender</h2>
+      <p>Top‑down shooter. Protect the city grid from waves of rogue drones.</p>
+      <a href="drone_defender.html" class="btn">Play</a>
+    </div>
+    <div class="card">
+      <h2>Quantum Puzzle</h2>
+      <p>Mind‑bending logic game. Align energy nodes to stabilize the flux core.</p>
+      <a href="quantum_puzzle.html" class="btn">Play</a>
+    </div>
+    <div class="card">
+      <h2>Starfall Arena</h2>
+      <p>Battle arena survival. Outlast waves of enemies with power‑ups and upgrades.</p>
+      <a href="starfall_arena.html" class="btn">Play</a>
+    </div>
+  </div>
+</body>
+</html>
