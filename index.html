@@ -1,124 +1,1044 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Neon Arcade</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Crystal Clicker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Use Orbitron for all text */
+    :root{
+      --teal:#00f6ff;
+      --accent:#002842;
+      --bg-1:#00363f;
+      --bg-2:#00202a;
+      --panel:#05222a;
+      --glass: rgba(255,255,255,0.02);
+    }
+    html,body{height:100%;margin:0;font-family:Orbitron, 'Orbitron', system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+    body{
+      display:flex;min-height:100vh;flex-direction:row;background:
+      radial-gradient(600px 400px at 20% 10%, rgba(0,246,255,0.04), transparent 8%),
+      radial-gradient(700px 500px at 85% 85%, rgba(0,40,66,0.03), transparent 8%),
+      linear-gradient(180deg,var(--bg-1),var(--bg-2));
+      color:var(--teal);overflow:hidden;
+    }
 
-<!-- Import a futuristic font (Orbitron) -->
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+    /* Layout */
+    .container{display:flex;flex:1;gap:16px;padding:20px;box-sizing:border-box;width:100%;}
+    .main{flex:1;min-width:260px;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative}
+    .panel{width:360px;max-width:40vw;min-width:260px;border-left:1px solid rgba(0,246,255,0.04);padding:18px;box-sizing:border-box;background:linear-gradient(180deg,var(--panel),transparent);overflow:auto}
+    header{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    h1{margin:0;font-size:26px;color:var(--teal);text-shadow:0 0 12px rgba(0,246,255,0.12)}
+    /* crystal / helmet */
+    #crystal{
+      width:220px;height:220px;border-radius:18px;
+      background-image:url('https://image2url.com/images/1759932930410-ff03ddbb-45d3-46bf-a848-a31b46cb3a5f.png');
+      background-repeat:no-repeat;background-position:center;background-size:contain;
+      cursor:pointer;filter:drop-shadow(0 0 20px rgba(0,246,255,0.15));
+      transition:transform .08s ease,filter .25s ease; touch-action:manipulation;
+      display:flex;align-items:center;justify-content:center;background-color:transparent;border:2px solid rgba(0,255,255,0.04);
+    }
+    #crystal:active{transform:scale(.96) rotate(-1.5deg)}
+    #score{font-size:18px;margin-top:8px}
+    #info{font-size:13px;color:rgba(255,255,255,0.92)}
 
-<style>
-  body {
-    margin: 0;
-    font-family: 'Orbitron', 'Segoe UI', sans-serif;
-    background: radial-gradient(circle at center, #0b0f1a, #05080f);
-    color: #e6f2ff;
-    overflow-x: hidden;
-  }
-  header {
-    text-align: center;
-    padding: 30px 20px;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #39ffe4;
-    text-shadow: 0 0 12px #39ffe4;
-    letter-spacing: 2px;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 24px;
-    padding: 20px 40px 60px;
-    max-width: 1200px;
-    margin: auto;
-  }
-  .card {
-    background: rgba(15, 25, 40, 0.85);
-    border: 2px solid #1b2e50;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 12px rgba(57,255,228,0.15);
-  }
-  .card:hover {
-    border-color: #ff2e72;
-    box-shadow: 0 0 20px rgba(255,46,114,0.6);
-    transform: translateY(-6px) scale(1.03);
-  }
-  .card h2 {
-    margin: 12px 0;
-    font-size: 1.3rem;
-    color: #78a6ff;
-    letter-spacing: 1px;
-  }
-  .card p {
-    font-size: 0.9rem;
-    color: #cfe4ff;
-    line-height: 1.4;
-  }
-  .btn {
-    display: inline-block;
-    margin-top: 12px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: 1px solid #39ffe4;
-    color: #39ffe4;
-    text-decoration: none;
-    font-weight: 600;
-    transition: 0.25s;
-  }
-  .btn:hover {
-    background: #39ffe4;
-    color: #0b0f1a;
-  }
-</style>
+    /* Controls layout: larger hitboxes */
+    .controls{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+    .btn{
+      appearance:none;-webkit-appearance:none;background:var(--glass);border:1px solid rgba(255,255,255,0.04);
+      padding:12px 18px;border-radius:12px;color:var(--teal);cursor:pointer;font-weight:700;letter-spacing:.6px;
+      transition:transform .12s,box-shadow .12s,background .12s;outline:none;min-width:84px;text-align:center;
+      box-shadow:0 6px 18px rgba(0,246,255,0.04);
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn:focus{box-shadow:0 8px 30px rgba(0,246,255,0.06);border-color:rgba(0,246,255,0.12)}
+
+    /* Export button uses Orbitron explicitly (all text already Orbitron) */
+    #exportBtn{ font-family: 'Orbitron', sans-serif; font-weight:700; letter-spacing:0.8px; }
+
+    /* rebirth dialog */
+    .rebirth-dialog{
+      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9999;
+      background:linear-gradient(180deg,#001a1c,#00111a);border:2px solid rgba(0,246,255,0.08);
+      padding:18px;border-radius:12px;color:var(--teal);display:none;min-width:300px;box-shadow:0 20px 80px rgba(0,0,0,0.6);
+    }
+    .rebirth-dialog h3{margin:0 0 8px 0}
+    .rebirth-dialog p{margin:6px 0 12px 0;color:rgba(255,255,255,0.9)}
+
+    /* upgrade list */
+    .upgrade{background:linear-gradient(180deg,rgba(255,255,255,0.015),transparent);border-radius:10px;padding:10px;margin-bottom:10px;border:1px solid rgba(0,246,255,0.04);display:flex;flex-direction:column;gap:6px}
+    .upgrade .meta{font-size:12px;color:rgba(255,255,255,0.85)}
+    .upgrade.locked{opacity:.28;filter:grayscale(.6);cursor:default}
+    .upgrade.buy{cursor:pointer}
+    .upgrade.buy:focus{outline:2px solid rgba(0,246,255,0.08)}
+
+    /* fx */
+    .fx{position:fixed;pointer-events:none;z-index:150;will-change:transform,opacity}
+    .fx.spin{animation:spin 3.6s linear infinite}
+    @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    .fx.burst{animation:burst 700ms ease-out forwards}
+    @keyframes burst{0%{opacity:1;transform:scale(.6)}100%{opacity:0;transform:scale(1.9)}}
+
+    /* soundcloud iframe styling */
+    .sc-player { width:1px;height:1px;opacity:0;border:0;position:fixed;left:-9999px;top:auto; } /* hidden accessible player */
+
+    /* responsive */
+    @media (max-width:900px){
+      .container{flex-direction:column;padding:12px}
+      .panel{width:100%;max-width:100%}
+      .main{order:2}
+      .panel{order:1}
+      #crystal{width:180px;height:180px}
+      .btn{min-width:70px;padding:10px 12px}
+    }
+
+    /* accessibility focus */
+    [tabindex]:focus{outline: 3px solid rgba(0,246,255,0.08);outline-offset:2px}
+  </style>
 </head>
 <body>
-  <header>✨ Neon Arcade ✨</header>
-  <div class="grid">
-    <div class="card">
-      <h2>Neon Strider</h2>
-      <p>Futuristic platformer. Double‑jump, dash, and collect shards in a neon skyline.</p>
-      <a href="https://tealdragons78.github.io/NeonStrider/" class="btn">Play</a>
-    </div>
-    <div class="card">
-      <h2>Cyber Racer</h2>
-      <p>High‑speed hover racing through neon tunnels. Dodge, drift, and boost to victory.</p>
-      <a href="https://tealdragons78.github.io/Cyber-Racer/" class="btn">Play</a>
-    </div>
-    <div class="card">
-      <h2>Drone Defender</h2>
-      <p>Top‑down shooter. Protect the city grid from waves of rogue drones.</p>
-      <a href="https://tealdragons78.github.io/Drone-Defender/" class="btn">Play</a>
-    </div>
-    <div class="card">
-      <h2>Quantum Puzzle</h2>
-      <p>Mind‑bending logic game. Align energy nodes to stabilise the flux core.</p>
-      <a href="https://tealdragons78.github.io/Quantum-Puzzle/" class="btn">Play</a>
-    </div>
-    <div class="card">
-      <h2>Starfall Arena</h2>
-      <p>Battle arena survival. Outlast waves of enemies with power‑ups and upgrades.</p>
-      <a href="starfall_arena.html" class="btn">Play</a>
-    </div>
-        <div class="card">
-      <h2>Neon Dash</h2>
-      <p>Geometry Dash styled Neonic futuristic game.</p>
-      <a href="https://tealdragons78.github.io/NeonDash/" class="btn">Play</a>
-    </div>
-        <div class="card">
-      <h2>Crystal Clicker</h2>
-      <p>This is a game where you mine precious crystals by clicking on a screen. The more you get, the more upgrades you can buy. Once you reach 100 billion crystals, you can choose to be reborn from the ashes, like a Pheonix, and start the journey all over again.</p>
-      <a href="https://tealdragons78.github.io/Crystal-Clicker/" class="btn">Play</a>
+  <div class="container" role="application" aria-label="Neon Crystal Clicker">
+    <main class="main" id="main">
+      <header>
+        <h1>Crystal Clicker</h1>
+        <div aria-hidden="true" style="font-size:13px;color:rgba(255,255,255,0.85)">Teal · Dark Blue accents</div>
+      </header>
+
+      <button id="crystal" aria-label="Crystal click target" title="Click to collect crystals"></button>
+
+      <div id="score" role="status" aria-live="polite">Crystals: 0</div>
+      <div id="info">Click power: <strong id="cp">1</strong> · Passive/sec: <strong id="ps">0</strong></div>
+
+      <div class="controls" role="group" aria-label="Game controls">
+        <button class="btn" id="saveBtn">Save</button>
+        <button class="btn" id="resetBtn">Reset</button>
+        <button class="btn" id="muteBtn" aria-pressed="false">Mute</button>
+        <label style="display:flex;align-items:center;gap:8px;color:var(--teal);font-size:13px">
+          <span style="font-size:12px;opacity:.9">Vol</span>
+          <input id="vol" type="range" min="0" max="1" step="0.05" value="0.9" aria-label="Volume" />
+        </label>
+      </div>
+
+      <footer><a href="https://tealdragons78.github.io/NeonUI/" style="color:var(--teal)" target="_blank" rel="noopener">← Back to Neon Arcade</a></footer>
+    </main>
+
+    <aside class="panel" role="region" aria-label="Upgrades and status">
+      <h2>Upgrades</h2>
+      <div id="upgrades" aria-live="polite"></div>
+
+      <div class="status" id="log" style="margin-top:12px">Log: ready</div>
+
+      <div style="margin-top:14px">
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn" id="exportBtn">Export Save</button>
+          <button class="btn" id="importBtn">Import Save</button>
+          <button class="btn" id="restoreBtn">Restore Backup</button>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.85)">
+          Save versioned, automatic backup kept.
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Rebirth dialog (modal-like) -->
+  <div class="rebirth-dialog" id="rebirthDialog" role="dialog" aria-modal="true" aria-labelledby="rebirthTitle">
+    <h3 id="rebirthTitle">REBIRTH Available</h3>
+    <p id="rebirthText"></p>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" id="rebirthCancel">Not now</button>
+      <button class="btn" id="rebirthConfirm">Rebirth</button>
     </div>
   </div>
+
+  <!-- audio fx (kept as local sound effects) -->
+  <audio id="clickSnd" src="https://www.soundjay.com/button/sounds/button-16.mp3" preload="auto"></audio>
+  <audio id="bigSnd" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
+
+  <!-- SoundCloud widget (hidden, used as background music source) -->
+  <!-- The provided SoundCloud URL (user's set) is used in the widget src parameter -->
+  <iframe id="scPlayer" class="sc-player"
+    src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/dfiechter2/sets/futuristic-music&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false"
+    allow="autoplay"></iframe>
+
+  <!-- SoundCloud Widget API -->
+  <script src="https://w.soundcloud.com/player/api.js"></script>
+
+<script>
+/* Full single-file: Orbitron text + SoundCloud background music control
+   Notes:
+   - SoundCloud player is embedded in a hidden iframe and controlled via the Widget API.
+   - Browsers require a user interaction to start playback; this code attempts to play on first user click.
+   - All text uses the Orbitron font (via Google Fonts).
+*/
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Config & keys
+  const SAVE_KEY = 'neon-crystals:v2';
+  const BACKUP_KEY = 'neon-crystals:backup';
+  const VERSION = 2;
+  const REBIRTH_THRESHOLD = 100_000_000_000;
+  const REBIRTH_BONUS_PERCENT = 0.02;
+
+  // DOM refs
+  const elCrystal = document.getElementById('crystal');
+  const elScore = document.getElementById('score');
+  const elCP = document.getElementById('cp');
+  const elPS = document.getElementById('ps');
+  const elUpgrades = document.getElementById('upgrades');
+  const elLog = document.getElementById('log');
+  const elSave = document.getElementById('saveBtn');
+  const elReset = document.getElementById('resetBtn');
+  const elMute = document.getElementById('muteBtn');
+  const elVol = document.getElementById('vol');
+  const elExport = document.getElementById('exportBtn');
+  const elImport = document.getElementById('importBtn');
+  const elRestore = document.getElementById('restoreBtn');
+  const elRebirthDialog = document.getElementById('rebirthDialog');
+  const elRebirthText = document.getElementById('rebirthText');
+  const elRebirthCancel = document.getElementById('rebirthCancel');
+  const elRebirthConfirm = document.getElementById('rebirthConfirm');
+  const clickSnd = document.getElementById('clickSnd');
+  const bigSnd = document.getElementById('bigSnd');
+
+  // SoundCloud widget setup
+  const scIframe = document.getElementById('scPlayer');
+  const widget = SC.Widget(scIframe); // SC Widget API exposed by included script
+  let scReady = false;
+  widget.bind(SC.Widget.Events.READY, () => { scReady = true; });
+
+  // Default state
+  const defaultState = {
+    version: VERSION,
+    crystals: 0,
+    clickPower: 1,
+    passivePerSec: 0,
+    purchased: {},
+    rebirths: 0,
+    audio: { muted:false, volume:0.9, musicOn:true }
+  };
+  let state = Object.assign({}, defaultState);
+
+  // load save
+  function safeNum(n){ return Number.isFinite(+n) ? +n : 0; }
+  function load(){
+    try{
+      const raw = localStorage.getItem(SAVE_KEY);
+      if(!raw) return;
+      const data = JSON.parse(raw);
+      if(!data || typeof data !== 'object') return;
+      if(data.version && data.version <= VERSION){
+        state = Object.assign({}, defaultState, data);
+        state.crystals = safeNum(state.crystals);
+        state.clickPower = Math.max(1, safeNum(state.clickPower));
+        state.passivePerSec = Math.max(0, safeNum(state.passivePerSec));
+        state.purchased = state.purchased || {};
+        state.audio = state.audio || defaultState.audio;
+      } else {
+        state.crystals = safeNum(data.crystals || 0);
+        state.clickPower = Math.max(1, safeNum(data.clickPower || 1));
+      }
+    }catch(e){
+      console.warn('Load failed', e);
+    }
+  }
+  load();
+
+  // upgrades (same balanced set)
+  const UPGRADE_DEFS = [
+    { id:'shard',    name:'Shard Amplifier',    cost:80,      click:3,     passive:0,     unlockLevel:1,  effect:'glow' },
+    { id:'fragment', name:'Fragment Cluster',  cost:900,     click:15,    passive:0,     unlockLevel:4,  effect:'nova' },
+    { id:'storm',    name:'Crystal Storm',     cost:5200,    click:0,     passive:60,    unlockLevel:8,  effect:'storm' },
+    { id:'reactor',  name:'Passive Reactor',   cost:26000,   click:0,     passive:260,   unlockLevel:12, effect:'spin' },
+    { id:'quant',    name:'Quantum Lattice',   cost:120000,  click:900,   passive:420,   unlockLevel:18, effect:'pulse' },
+    { id:'galax',    name:'Galactic Array',    cost:900000,  click:4200,  passive:2600,  unlockLevel:28, effect:'galaxy' },
+    { id:'celest',   name:'Celestial Engine',  cost:9800000, click:20000, passive:13000, unlockLevel:40, effect:'supernova' }
+  ];
+
+  // particle pool
+  const POOL_SIZE = 20;
+  const CRYSTAL_IMG = 'https://image2url.com/images/1759932930410-ff03ddbb-45d3-46bf-a848-a31b46cb3a5f.png';
+  const particlePool = [];
+  for(let i=0;i<POOL_SIZE;i++){
+    const el = document.createElement('div');
+    el.className = 'fx burst';
+    el.style.width = '48px';
+    el.style.height = '48px';
+    el.style.backgroundImage = `url('${CRYSTAL_IMG}')`;
+    el.style.backgroundSize = 'contain';
+    el.style.opacity = '0';
+    document.body.appendChild(el);
+    particlePool.push({el, busy:false});
+  }
+  function getParticle(){
+    for(const p of particlePool) if(!p.busy){ p.busy = true; return p; }
+    return particlePool[Math.floor(Math.random()*particlePool.length)];
+  }
+  function releaseParticle(p, delay=900){ setTimeout(()=> p.busy=false, delay); }
+
+  // helpers
+  function computeLevel(crystals){ if(crystals < 10) return 1; return Math.floor(Math.log10(crystals)) + 1; }
+  function format(n){ if(n >= 1e12) return (n/1e12).toFixed(2)+'T'; if(n >= 1e9) return (n/1e9).toFixed(2)+'B'; if(n >= 1e6) return (n/1e6).toFixed(2)+'M'; if(n >= 1e3) return (n/1e3).toFixed(2)+'K'; return Math.floor(n).toLocaleString(); }
+
+  // save/backup/export/import/restore
+  function save(){
+    try{
+      localStorage.setItem(SAVE_KEY, JSON.stringify(Object.assign({}, state, {version:VERSION})));
+      localStorage.setItem(BACKUP_KEY, JSON.stringify(Object.assign({}, state, {version:VERSION})));
+    }catch(e){ console.warn('Save failed', e); }
+  }
+  function exportSave(){
+    try{
+      const txt = JSON.stringify(Object.assign({}, state, {version:VERSION}), null, 2);
+      navigator.clipboard?.writeText(txt).then(()=> alert('Save copied to clipboard (JSON)')).catch(()=> { prompt('Copy this JSON save', txt); });
+    }catch(e){ alert('Export failed'); }
+  }
+  function importSave(json){
+    try{
+      const data = typeof json === 'string' ? JSON.parse(json) : json;
+      if(!data || typeof data !== 'object') throw new Error('Invalid');
+      state = Object.assign({}, defaultState, data);
+      state.crystals = safeNum(state.crystals);
+      state.clickPower = Math.max(1, safeNum(state.clickPower));
+      state.passivePerSec = Math.max(0, safeNum(state.passivePerSec));
+      state.purchased = state.purchased || {};
+      state.audio = state.audio || defaultState.audio;
+      save(); updateUI(); alert('Import successful');
+    }catch(e){ alert('Import failed: invalid JSON'); }
+  }
+  function restoreBackup(){
+    try{
+      const raw = localStorage.getItem(BACKUP_KEY);
+      if(!raw){ alert('No backup found'); return; }
+      importSave(raw);
+    }catch(e){ alert('Restore failed'); }
+  }
+
+  // audio controls using SoundCloud Widget
+  // state.audio: { muted, volume (0..1), musicOn }
+  function applyAudioSettings(){
+    // Widget volume uses 0..100
+    if(scReady){
+      const volPercent = Math.round((state.audio.volume || 0.9) * 100);
+      widget.setVolume(volPercent);
+    }
+    if(state.audio.muted || !state.audio.musicOn){
+      // pause
+      if(scReady) widget.pause();
+      elMute.setAttribute('aria-pressed','true'); elMute.textContent = 'Muted';
+    } else {
+      // play
+      if(scReady) widget.play();
+      elMute.setAttribute('aria-pressed','false'); elMute.textContent = 'Mute';
+    }
+    elVol.value = state.audio.volume;
+  }
+
+  function playLocalSound(a){
+    try{ if(!state.audio.muted){ a.currentTime = 0; a.play().catch(()=>{}); } }catch(e){}
+  }
+
+  // spawn particle
+  let lastBurst = 0;
+  const BURST_MIN_INTERVAL = 40;
+  function spawnBurst(x,y,scale=1,spin=false){
+    const now = performance.now();
+    if(now - lastBurst < BURST_MIN_INTERVAL) return;
+    lastBurst = now;
+    const p = getParticle();
+    const el = p.el;
+    el.style.left = (x - 24) + 'px';
+    el.style.top = (y - 24) + 'px';
+    el.style.width = (48*scale) + 'px';
+    el.style.height = (48*scale) + 'px';
+    el.style.opacity = '1';
+    el.style.transform = 'scale(.6)';
+    el.classList.remove('spin','burst');
+    if(spin) el.classList.add('spin');
+    void el.offsetWidth;
+    el.classList.add('burst');
+    releaseParticle(p, 900);
+  }
+
+  function spawnOrbiting(count=6, radius=120, duration=7000){
+    const container = document.createElement('div');
+    container.className = 'fx spin';
+    container.style.left = '50%';
+    container.style.top = '42%';
+    container.style.width = (radius*2) + 'px';
+    container.style.height = (radius*2) + 'px';
+    container.style.transform = 'translate(-50%,-50%)';
+    container.style.pointerEvents = 'none';
+    for(let i=0;i<count;i++){
+      const child = document.createElement('div');
+      child.style.width='34px'; child.style.height='34px'; child.style.position='absolute';
+      const angle = (i/count)*Math.PI*2;
+      child.style.left = (radius + Math.cos(angle)*radius - 17)+'px';
+      child.style.top  = (radius + Math.sin(angle)*radius - 17)+'px';
+      child.style.backgroundImage = `url('${CRYSTAL_IMG}')`;
+      child.style.backgroundSize = 'contain';
+      child.style.opacity = '0.95';
+      container.appendChild(child);
+    }
+    document.body.appendChild(container);
+    setTimeout(()=> container.remove(), duration);
+  }
+
+  // effect triggers (same as before, but music via widget)
+  function triggerEffect(effect){
+    const rect = elCrystal.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    if(effect === 'glow'){
+      elCrystal.animate([{filter:'drop-shadow(0 0 18px rgba(0,246,255,0.25))'},{filter:'drop-shadow(0 0 54px rgba(0,40,66,0.3))'}],{duration:900,iterations:2});
+      playLocalSound(clickSnd);
+    } else if(effect === 'nova'){
+      spawnBurst(cx, cy, 1.6, true);
+      playLocalSound(bigSnd);
+    } else if(effect === 'storm'){
+      for(let i=0;i<10;i++) spawnBurst(cx + (Math.random()-0.5)*260, cy + (Math.random()-0.5)*200, 0.9 + Math.random()*0.9, Math.random()>0.5);
+    } else if(effect === 'spin'){
+      spawnOrbiting(10, 160, 9000);
+    } else if(effect === 'pulse'){
+      document.body.animate([{transform:'scale(1)'},{transform:'scale(1.006)'}],{duration:700,iterations:2});
+      for(let i=0;i<6;i++) spawnBurst(cx + (Math.random()-0.5)*320, cy + (Math.random()-0.5)*240, 1 + Math.random()*0.8, true);
+    } else if(effect === 'galaxy' || effect === 'supernova'){
+      for(let i=0;i<20;i++) spawnBurst(cx + (Math.random()-0.5)*540, cy + (Math.random()-0.5)*420, 1 + Math.random()*1.4, true);
+      playLocalSound(bigSnd);
+    }
+  }
+
+  // render upgrades
+  function renderUpgrades(){
+    elUpgrades.innerHTML = '';
+    const lvl = computeLevel(state.crystals);
+    for(const def of UPGRADE_DEFS){
+      const div = document.createElement('div');
+      div.className = 'upgrade';
+      const bought = !!state.purchased[def.id];
+      if(lvl < def.unlockLevel || bought) div.classList.add('locked');
+      const parts = [];
+      if(def.click) parts.push('+'+def.click+'/click');
+      if(def.passive) parts.push('+'+def.passive+'/sec');
+      div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:700">${def.name}${bought? ' • BOUGHT':''}</div>
+          <div style="font-size:13px;color:var(--teal)">${format(def.cost)}</div>
+        </div>
+        <div class="meta">${parts.join(' · ') || '--'}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75)">Unlock Lv ${def.unlockLevel}</div>`;
+      if(!(lvl < def.unlockLevel) && !bought){
+        div.classList.add('buy');
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Neon Crystal Clicker — Fixed</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --teal:#00f6ff;
+      --accent:#002842;
+      --bg-1:#00363f;
+      --bg-2:#00202a;
+      --panel:#05222a;
+      --glass: rgba(255,255,255,0.02);
+    }
+    html,body{height:100%;margin:0;font-family:Orbitron, 'Orbitron', system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+    body{
+      display:flex;min-height:100vh;flex-direction:row;background:
+      radial-gradient(600px 400px at 20% 10%, rgba(0,246,255,0.04), transparent 8%),
+      radial-gradient(700px 500px at 85% 85%, rgba(0,40,66,0.03), transparent 8%),
+      linear-gradient(180deg,var(--bg-1),var(--bg-2));
+      color:var(--teal);overflow:hidden;
+    }
+
+    .container{display:flex;flex:1;gap:16px;padding:20px;box-sizing:border-box;width:100%;}
+    .main{flex:1;min-width:260px;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative}
+    .panel{width:360px;max-width:40vw;min-width:260px;border-left:1px solid rgba(0,246,255,0.04);padding:18px;box-sizing:border-box;background:linear-gradient(180deg,var(--panel),transparent);overflow:auto}
+    header{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    h1{margin:0;font-size:26px;color:var(--teal);text-shadow:0 0 12px rgba(0,246,255,0.12)}
+    #crystal{
+      width:220px;height:220px;border-radius:18px;
+      background-image:url('https://image2url.com/images/1759932930410-ff03ddbb-45d3-46bf-a848-a31b46cb3a5f.png');
+      background-repeat:no-repeat;background-position:center;background-size:contain;
+      cursor:pointer;filter:drop-shadow(0 0 20px rgba(0,246,255,0.15));
+      transition:transform .08s ease,filter .25s ease; touch-action:manipulation;
+      display:flex;align-items:center;justify-content:center;background-color:transparent;border:2px solid rgba(0,255,255,0.04);
+    }
+    #crystal:active{transform:scale(.96) rotate(-1.5deg)}
+    #score{font-size:18px;margin-top:8px}
+    #info{font-size:13px;color:rgba(255,255,255,0.92)}
+
+    .controls{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+    .btn{
+      appearance:none;-webkit-appearance:none;background:var(--glass);border:1px solid rgba(255,255,255,0.04);
+      padding:12px 18px;border-radius:12px;color:var(--teal);cursor:pointer;font-weight:700;letter-spacing:.6px;
+      transition:transform .12s,box-shadow .12s,background .12s;outline:none;min-width:84px;text-align:center;
+      box-shadow:0 6px 18px rgba(0,246,255,0.04);
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn:focus{box-shadow:0 8px 30px rgba(0,246,255,0.06);border-color:rgba(0,246,255,0.12)}
+    #exportBtn{ font-family: 'Orbitron', sans-serif; font-weight:700; letter-spacing:0.8px; }
+
+    .rebirth-dialog{
+      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9999;
+      background:linear-gradient(180deg,#001a1c,#00111a);border:2px solid rgba(0,246,255,0.08);
+      padding:18px;border-radius:12px;color:var(--teal);display:none;min-width:300px;box-shadow:0 20px 80px rgba(0,0,0,0.6);
+    }
+    .upgrade{background:linear-gradient(180deg,rgba(255,255,255,0.015),transparent);border-radius:10px;padding:10px;margin-bottom:10px;border:1px solid rgba(0,246,255,0.04);display:flex;flex-direction:column;gap:6px}
+    .upgrade .meta{font-size:12px;color:rgba(255,255,255,0.85)}
+    .upgrade.locked{opacity:.28;filter:grayscale(.6);cursor:default}
+    .upgrade.buy{cursor:pointer}
+    .fx{position:fixed;pointer-events:none;z-index:150;will-change:transform,opacity}
+    .fx.spin{animation:spin 3.6s linear infinite}@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    .fx.burst{animation:burst 700ms ease-out forwards}@keyframes burst{0%{opacity:1;transform:scale(.6)}100%{opacity:0;transform:scale(1.9)}}
+    .sc-player { width:1px;height:1px;opacity:0;border:0;position:fixed;left:-9999px;top:auto; }
+
+    @media (max-width:900px){
+      .container{flex-direction:column;padding:12px}
+      .panel{width:100%;max-width:100%}
+      .main{order:2}
+      .panel{order:1}
+      #crystal{width:180px;height:180px}
+      .btn{min-width:70px;padding:10px 12px}
+    }
+    [tabindex]:focus{outline: 3px solid rgba(0,246,255,0.08);outline-offset:2px}
+  </style>
+</head>
+<body>
+  <div class="container" role="application" aria-label="Neon Crystal Clicker">
+    <main class="main" id="main">
+      <header>
+        <h1>Neon Crystal Clicker</h1>
+        <div aria-hidden="true" style="font-size:13px;color:rgba(255,255,255,0.85)">Teal · Dark Blue accents</div>
+      </header>
+
+      <button id="crystal" aria-label="Crystal click target" title="Click to collect crystals"></button>
+
+      <div id="score" role="status" aria-live="polite">Crystals: 0</div>
+      <div id="info">Click power: <strong id="cp">1</strong> · Passive/sec: <strong id="ps">0</strong></div>
+
+      <div class="controls" role="group" aria-label="Game controls">
+        <button class="btn" id="saveBtn">Save</button>
+        <button class="btn" id="resetBtn">Reset</button>
+        <button class="btn" id="muteBtn" aria-pressed="false">Mute</button>
+        <label style="display:flex;align-items:center;gap:8px;color:var(--teal);font-size:13px">
+          <span style="font-size:12px;opacity:.9">Vol</span>
+          <input id="vol" type="range" min="0" max="1" step="0.05" value="0.9" aria-label="Volume" />
+        </label>
+      </div>
+
+      <footer><a href="https://tealdragons78.github.io/NeonUI/" style="color:var(--teal)" target="_blank" rel="noopener">← Back to NeonUI</a></footer>
+    </main>
+
+    <aside class="panel" role="region" aria-label="Upgrades and status">
+      <h2>Upgrades</h2>
+      <div id="upgrades" aria-live="polite"></div>
+
+      <div class="status" id="log" style="margin-top:12px">Log: ready</div>
+
+      <div style="margin-top:14px">
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn" id="exportBtn">Export Save</button>
+          <button class="btn" id="importBtn">Import Save</button>
+          <button class="btn" id="restoreBtn">Restore Backup</button>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.85)">Save versioned, automatic backup kept.</div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="rebirth-dialog" id="rebirthDialog" role="dialog" aria-modal="true" aria-labelledby="rebirthTitle">
+    <h3 id="rebirthTitle">REBIRTH Available</h3>
+    <p id="rebirthText"></p>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" id="rebirthCancel">Not now</button>
+      <button class="btn" id="rebirthConfirm">Rebirth</button>
+    </div>
+  </div>
+
+  <audio id="clickSnd" src="https://www.soundjay.com/button/sounds/button-16.mp3" preload="auto"></audio>
+  <audio id="bigSnd" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
+
+  <iframe id="scPlayer" class="sc-player"
+    src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/dfiechter2/sets/futuristic-music&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false"
+    allow="autoplay"></iframe>
+
+  <script src="https://w.soundcloud.com/player/api.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // CONFIG
+  const SAVE_KEY = 'neon-crystals:v2';
+  const BACKUP_KEY = 'neon-crystals:backup';
+  const VERSION = 2;
+  const REBIRTH_THRESHOLD = 100_000_000_000;
+  const REBIRTH_BONUS_PERCENT = 0.02;
+
+  // DOM refs
+  const elCrystal = document.getElementById('crystal');
+  const elScore = document.getElementById('score');
+  const elCP = document.getElementById('cp');
+  const elPS = document.getElementById('ps');
+  const elUpgrades = document.getElementById('upgrades');
+  const elLog = document.getElementById('log');
+  const elSave = document.getElementById('saveBtn');
+  const elReset = document.getElementById('resetBtn');
+  const elMute = document.getElementById('muteBtn');
+  const elVol = document.getElementById('vol');
+  const elExport = document.getElementById('exportBtn');
+  const elImport = document.getElementById('importBtn');
+  const elRestore = document.getElementById('restoreBtn');
+  const elRebirthDialog = document.getElementById('rebirthDialog');
+  const elRebirthText = document.getElementById('rebirthText');
+  const elRebirthCancel = document.getElementById('rebirthCancel');
+  const elRebirthConfirm = document.getElementById('rebirthConfirm');
+  const clickSnd = document.getElementById('clickSnd');
+  const bigSnd = document.getElementById('bigSnd');
+
+  // SoundCloud widget (safe init)
+  const scIframe = document.getElementById('scPlayer');
+  let widget = null;
+  let scReady = false;
+  if (window.SC && scIframe) {
+    widget = SC.Widget(scIframe);
+    widget.bind(SC.Widget.Events.READY, () => { scReady = true; applyAudioSettings(); });
+  } else {
+    // try to bind later if SC loads after
+    window.addEventListener('load', () => {
+      if (window.SC && scIframe && !widget) {
+        widget = SC.Widget(scIframe);
+        widget.bind(SC.Widget.Events.READY, () => { scReady = true; applyAudioSettings(); });
+      }
+    });
+  }
+
+  // Default state
+  const defaultState = {
+    version: VERSION,
+    crystals: 0,
+    clickPower: 1,
+    passivePerSec: 0,
+    purchased: {},
+    rebirths: 0,
+    audio: { muted:false, volume:0.9, musicOn:true }
+  };
+  let state = Object.assign({}, defaultState);
+
+  // Utility
+  function safeNum(n){ return Number.isFinite(+n) ? +n : 0; }
+  function computeLevel(crystals){ if(crystals < 10) return 1; return Math.floor(Math.log10(crystals)) + 1; }
+  function format(n){
+    if(n >= 1e12) return (n/1e12).toFixed(2)+'T';
+    if(n >= 1e9) return (n/1e9).toFixed(2)+'B';
+    if(n >= 1e6) return (n/1e6).toFixed(2)+'M';
+    if(n >= 1e3) return (n/1e3).toFixed(2)+'K';
+    return Math.floor(n).toLocaleString();
+  }
+
+  // Save/load
+  function load(){
+    try{
+      const raw = localStorage.getItem(SAVE_KEY);
+      if(!raw) return;
+      const data = JSON.parse(raw);
+      if(!data || typeof data !== 'object') return;
+      if(data.version && data.version <= VERSION){
+        state = Object.assign({}, defaultState, data);
+        state.crystals = safeNum(state.crystals);
+        state.clickPower = Math.max(1, safeNum(state.clickPower));
+        state.passivePerSec = Math.max(0, safeNum(state.passivePerSec));
+        state.purchased = state.purchased || {};
+        state.audio = state.audio || defaultState.audio;
+      } else {
+        state.crystals = safeNum(data.crystals || 0);
+        state.clickPower = Math.max(1, safeNum(data.clickPower || 1));
+      }
+    }catch(e){
+      console.warn('Load failed', e);
+    }
+  }
+  load();
+
+  // Upgrades
+  const UPGRADE_DEFS = [
+    { id:'shard',    name:'Shard Amplifier',    cost:80,      click:3,     passive:0,     unlockLevel:1,  effect:'glow' },
+    { id:'fragment', name:'Fragment Cluster',  cost:900,     click:15,    passive:0,     unlockLevel:4,  effect:'nova' },
+    { id:'storm',    name:'Crystal Storm',     cost:5200,    click:0,     passive:60,    unlockLevel:8,  effect:'storm' },
+    { id:'reactor',  name:'Passive Reactor',   cost:26000,   click:0,     passive:260,   unlockLevel:12, effect:'spin' },
+    { id:'quant',    name:'Quantum Lattice',   cost:120000,  click:900,   passive:420,   unlockLevel:18, effect:'pulse' },
+    { id:'galax',    name:'Galactic Array',    cost:900000,  click:4200,  passive:2600,  unlockLevel:28, effect:'galaxy' },
+    { id:'celest',   name:'Celestial Engine',  cost:9800000, click:20000, passive:13000, unlockLevel:40, effect:'supernova' }
+  ];
+
+  // Particle pool
+  const POOL_SIZE = 20;
+  const CRYSTAL_IMG = 'https://image2url.com/images/1759932930410-ff03ddbb-45d3-46bf-a848-a31b46cb3a5f.png';
+  const particlePool = [];
+  for(let i=0;i<POOL_SIZE;i++){
+    const el = document.createElement('div');
+    el.className = 'fx burst';
+    el.style.width = '48px';
+    el.style.height = '48px';
+    el.style.backgroundImage = `url('${CRYSTAL_IMG}')`;
+    el.style.backgroundSize = 'contain';
+    el.style.opacity = '0';
+    document.body.appendChild(el);
+    particlePool.push({el, busy:false});
+  }
+  function getParticle(){ for(const p of particlePool) if(!p.busy){ p.busy = true; return p; } return particlePool[Math.floor(Math.random()*particlePool.length)]; }
+  function releaseParticle(p, delay=900){ setTimeout(()=> p.busy=false, delay); }
+
+  // FX & audio helpers
+  function playLocalSound(a){ try{ if(!state.audio.muted){ a.currentTime = 0; a.play().catch(()=>{}); } }catch(e){} }
+  let lastBurst = 0;
+  const BURST_MIN_INTERVAL = 40;
+  function spawnBurst(x,y,scale=1,spin=false){
+    const now = performance.now();
+    if(now - lastBurst < BURST_MIN_INTERVAL) return;
+    lastBurst = now;
+    const p = getParticle();
+    const el = p.el;
+    el.style.left = (x - 24) + 'px';
+    el.style.top = (y - 24) + 'px';
+    el.style.width = (48*scale) + 'px';
+    el.style.height = (48*scale) + 'px';
+    el.style.opacity = '1';
+    el.style.transform = 'scale(.6)';
+    el.classList.remove('spin','burst');
+    if(spin) el.classList.add('spin');
+    void el.offsetWidth;
+    el.classList.add('burst');
+    releaseParticle(p, 900);
+  }
+  function spawnOrbiting(count=6, radius=120, duration=7000){
+    const container = document.createElement('div');
+    container.className = 'fx spin';
+    container.style.left = '50%';
+    container.style.top = '42%';
+    container.style.width = (radius*2) + 'px';
+    container.style.height = (radius*2) + 'px';
+    container.style.transform = 'translate(-50%,-50%)';
+    container.style.pointerEvents = 'none';
+    for(let i=0;i<count;i++){
+      const child = document.createElement('div');
+      child.style.width='34px'; child.style.height='34px'; child.style.position='absolute';
+      const angle = (i/count)*Math.PI*2;
+      child.style.left = (radius + Math.cos(angle)*radius - 17)+'px';
+      child.style.top  = (radius + Math.sin(angle)*radius - 17)+'px';
+      child.style.backgroundImage = `url('${CRYSTAL_IMG}')`;
+      child.style.backgroundSize = 'contain';
+      child.style.opacity = '0.95';
+      container.appendChild(child);
+    }
+    document.body.appendChild(container);
+    setTimeout(()=> container.remove(), duration);
+  }
+
+  function triggerEffect(effect){
+    const rect = elCrystal.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    if(effect === 'glow'){
+      elCrystal.animate([{filter:'drop-shadow(0 0 18px rgba(0,246,255,0.25))'},{filter:'drop-shadow(0 0 54px rgba(0,40,66,0.3))'}],{duration:900,iterations:2});
+      playLocalSound(clickSnd);
+    } else if(effect === 'nova'){
+      spawnBurst(cx, cy, 1.6, true);
+      playLocalSound(bigSnd);
+    } else if(effect === 'storm'){
+      for(let i=0;i<10;i++) spawnBurst(cx + (Math.random()-0.5)*260, cy + (Math.random()-0.5)*200, 0.9 + Math.random()*0.9, Math.random()>0.5);
+    } else if(effect === 'spin'){
+      spawnOrbiting(10, 160, 9000);
+    } else if(effect === 'pulse'){
+      document.body.animate([{transform:'scale(1)'},{transform:'scale(1.006)'}],{duration:700,iterations:2});
+      for(let i=0;i<6;i++) spawnBurst(cx + (Math.random()-0.5)*320, cy + (Math.random()-0.5)*240, 1 + Math.random()*0.8, true);
+    } else if(effect === 'galaxy' || effect === 'supernova'){
+      for(let i=0;i<20;i++) spawnBurst(cx + (Math.random()-0.5)*540, cy + (Math.random()-0.5)*420, 1 + Math.random()*1.4, true);
+      playLocalSound(bigSnd);
+    }
+  }
+
+  // render upgrades
+  function renderUpgrades() {
+  const elUpgrades = document.getElementById('upgrades');
+  elUpgrades.innerHTML = '';
+  for (const def of UPGRADE_DEFS) {
+    const div = document.createElement('div');
+    div.className = 'upgrade';
+    const bought = !!state.purchased[def.id];
+    const unlockThreshold = def.cost * 1.3;
+    const unlocked = state.crystals >= unlockThreshold;
+
+    if (!unlocked || bought) div.classList.add('locked');
+
+    const parts = [];
+    if (def.click) parts.push('+' + def.click + '/click');
+    if (def.passive) parts.push('+' + def.passive + '/sec');
+
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700">${def.name}${bought ? ' • BOUGHT' : ''}</div>
+        <div style="font-size:13px;color:var(--teal)">${def.cost.toLocaleString()}</div>
+      </div>
+      <div class="meta">${parts.join(' · ') || '--'}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.75)">
+        Unlocks at ${Math.ceil(unlockThreshold).toLocaleString()} crystals
+      </div>
+    `;
+
+    if (unlocked && !bought) {
+      div.classList.add('buy');
+      div.tabIndex = 0;
+      div.setAttribute('role', 'button');
+      div.setAttribute('aria-pressed', 'false');
+      div.addEventListener('click', () => tryBuy(def));
+      div.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') tryBuy(def);
+      });
+    } else {
+      div.tabIndex = -1;
+    }
+
+    elUpgrades.appendChild(div);
+  }
+}
+
+
+  function tryBuy(def){
+    if(!!state.purchased[def.id]) return;
+    const lvl = computeLevel(state.crystals);
+    if(lvl < def.unlockLevel){ elLog.textContent = `Log: locked until level ${def.unlockLevel}`; return; }
+    if(state.crystals < def.cost){ elLog.textContent = `Log: need ${(def.cost - Math.floor(state.crystals)).toLocaleString()} more`; return; }
+    state.crystals -= def.cost;
+    state.clickPower += def.click || 0;
+    state.passivePerSec += def.passive || 0;
+    state.purchased[def.id] = true;
+    triggerEffect(def.effect);
+    playLocalSound(clickSnd);
+    save();
+    updateUI();
+  }
+
+  // rebirth
+  let rebirthDialogShown = false;
+  function maybePromptRebirth(){
+    if(state.crystals < REBIRTH_THRESHOLD) return;
+    if(rebirthDialogShown) return;
+    rebirthDialogShown = true;
+    elRebirthText.textContent = `You have reached ${format(state.crystals)} crystals. Rebirthing will reset crystals and upgrades but grant a permanent bonus to click power. Perform rebirth now?`;
+    elRebirthDialog.style.display = 'block';
+    elRebirthConfirm.focus();
+  }
+  function closeRebirthDialog(){ rebirthDialogShown = false; elRebirthDialog.style.display = 'none'; }
+  function performRebirth(){
+    state.rebirths = safeNum(state.rebirths) + 1;
+    const bonus = 1 + (REBIRTH_BONUS_PERCENT * state.rebirths);
+    state.clickPower = Math.max(1, Math.floor(state.clickPower * bonus) + Math.floor(state.rebirths * 2));
+    state.crystals = 0;
+    state.passivePerSec = 0;
+    state.purchased = {};
+    try{ if(widget && scReady) widget.pause(); }catch(e){}
+    playLocalSound(bigSnd);
+    elLog.textContent = `Log: Rebirth performed (x${state.rebirths})`;
+    save();
+    closeRebirthDialog();
+    updateUI();
+  }
+
+  // interactions
+  elCrystal.addEventListener('click', (ev) => {
+    state.crystals += state.clickPower;
+    spawnBurst(ev.clientX, ev.clientY, 1, Math.random()>0.4);
+    playLocalSound(clickSnd);
+    maybePromptRebirth();
+    updateUI();
+    // start SC player on first interaction if allowed and user enabled music
+    if(state.audio.musicOn && scReady && widget){
+      try{ widget.play(); }catch(e){}
+    }
+  });
+  elCrystal.tabIndex = 0;
+  elCrystal.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); elCrystal.click(); } });
+
+  // passive tick
+  setInterval(()=>{ state.crystals += state.passivePerSec / 10; maybePromptRebirth(); updateUI(); }, 100);
+
+  // save/reset/export/import/restore
+  function save(){
+    try{
+      localStorage.setItem(SAVE_KEY, JSON.stringify(Object.assign({}, state, {version:VERSION})));
+      localStorage.setItem(BACKUP_KEY, JSON.stringify(Object.assign({}, state, {version:VERSION})));
+    }catch(e){ console.warn('Save failed', e); }
+  }
+  function exportSave(){
+    try{
+      const txt = JSON.stringify(Object.assign({}, state, {version:VERSION}), null, 2);
+      navigator.clipboard?.writeText(txt).then(()=> alert('Save copied to clipboard (JSON)')).catch(()=> { prompt('Copy this JSON save', txt); });
+    }catch(e){ alert('Export failed'); }
+  }
+  function importSave(json){
+    try{
+      const data = typeof json === 'string' ? JSON.parse(json) : json;
+      if(!data || typeof data !== 'object') throw new Error('Invalid');
+      state = Object.assign({}, defaultState, data);
+      state.crystals = safeNum(state.crystals);
+      state.clickPower = Math.max(1, safeNum(state.clickPower));
+      state.passivePerSec = Math.max(0, safeNum(state.passivePerSec));
+      state.purchased = state.purchased || {};
+      state.audio = state.audio || defaultState.audio;
+      save(); updateUI(); alert('Import successful');
+    }catch(e){ alert('Import failed: invalid JSON'); }
+  }
+  function restoreBackup(){
+    try{
+      const raw = localStorage.getItem(BACKUP_KEY);
+      if(!raw){ alert('No backup found'); return; }
+      importSave(raw);
+    }catch(e){ alert('Restore failed'); }
+  }
+
+  // audio controls via widget
+  if(elSave) elSave.addEventListener('click', ()=>{ save(); alert('Saved'); });
+  if(elReset) elReset.addEventListener('click', ()=> {
+    if(!confirm('Reset all progress? This clears your save and backup.')) return;
+    try{ localStorage.removeItem(SAVE_KEY); localStorage.removeItem(BACKUP_KEY); }catch(e){}
+    state = Object.assign({}, defaultState);
+    save();
+    updateUI();
+    alert('Reset complete');
+    location.reload();
+  });
+  if(elExport) elExport.addEventListener('click', ()=> exportSave());
+  if(elImport) elImport.addEventListener('click', ()=> {
+    const txt = prompt('Paste save JSON to import (cancels if empty)');
+    if(!txt) return;
+    importSave(txt);
+  });
+  if(elRestore) elRestore.addEventListener('click', ()=> {
+    if(!confirm('Restore latest automatic backup?')) return;
+    restoreBackup();
+  });
+
+  if(elMute) elMute.addEventListener('click', ()=>{
+    state.audio.muted = !state.audio.muted;
+    try{ if(widget && scReady){ if(state.audio.muted) widget.pause(); else if(state.audio.musicOn) widget.play(); } }catch(e){}
+    applyAudioSettings();
+    save();
+  });
+  if(elVol) elVol.addEventListener('input', (e)=>{
+    state.audio.volume = parseFloat(e.target.value);
+    try{ if(widget && scReady) widget.setVolume(Math.round(state.audio.volume * 100)); }catch(e){}
+    save();
+  });
+
+  if(elRebirthCancel) elRebirthCancel.addEventListener('click', ()=> { closeRebirthDialog(); });
+  if(elRebirthConfirm) elRebirthConfirm.addEventListener('click', ()=> { performRebirth(); });
+
+  // keyboard shortcuts
+  document.addEventListener('keydown', (e)=>{
+    if(e.altKey || e.ctrlKey || e.metaKey) return;
+    if(e.key === 's'){ e.preventDefault(); save(); elLog.textContent = 'Log: saved (shortcut)'; }
+    if(e.key === 'm'){ state.audio.muted = !state.audio.muted; try{ if(widget && scReady){ if(state.audio.muted) widget.pause(); else if(state.audio.musicOn) widget.play(); } }catch(e){} applyAudioSettings(); save(); }
+  });
+
+  function applyAudioSettings(){
+    if(scReady && widget){
+      try{
+        const volPercent = Math.round((state.audio.volume || 0.9) * 100);
+        widget.setVolume(volPercent);
+        if(state.audio.muted || !state.audio.musicOn) widget.pause();
+        else widget.play();
+      }catch(e){}
+    }
+    if(elVol) elVol.value = safeNum(state.audio.volume || 0.9);
+    if(elMute) { elMute.setAttribute('aria-pressed', state.audio.muted ? 'true' : 'false'); elMute.textContent = state.audio.muted ? 'Muted' : 'Mute'; }
+  }
+
+  function updateUI(){
+    if(elScore) elScore.textContent = `Crystals: ${format(state.crystals)}`;
+    const cp = document.getElementById('cp'); if(cp) cp.textContent = state.clickPower.toLocaleString();
+    const ps = document.getElementById('ps'); if(ps) ps.textContent = state.passivePerSec.toLocaleString();
+    if(elLog) elLog.textContent = `Log: lvl ${computeLevel(state.crystals)} · rebirths ${state.rebirths}`;
+    renderUpgrades();
+    save();
+  }
+
+  // start music on first gesture if possible
+  function tryStartMusicOnce(){
+    if(scReady && widget && state.audio.musicOn && !state.audio.muted){
+      try{ widget.play(); }catch(e){}
+    }
+    window.removeEventListener('click', tryStartMusicOnce);
+    window.removeEventListener('keydown', tryStartMusicOnce);
+  }
+  window.addEventListener('click', tryStartMusicOnce);
+  window.addEventListener('keydown', tryStartMusicOnce);
+
+  // initial render and tickers
+  renderUpgrades();
+  updateUI();
+  applyAudioSettings();
+
+  // passive income tick (10x/sec) and rebirth prompt
+  setInterval(()=> {
+    state.crystals += state.passivePerSec / 10;
+    updateUI();
+    if(state.crystals >= REBIRTH_THRESHOLD && elRebirthDialog){
+      elRebirthDialog.style.display = 'block';
+      elRebirthText.textContent = `You reached ${format(state.crystals)} crystals. Rebirth now?`;
+    }
+  }, 100);
+
+  // expose debug
+  window._NEON = { state, defs: UPGRADE_DEFS, widgetReady: () => scReady };
+
+}); // DOMContentLoaded
+</script>
+<script>
+function renderUpgrades() {
+  const elUpgrades = document.getElementById('upgrades');
+  elUpgrades.innerHTML = '';
+  for (const def of UPGRADE_DEFS) {
+    const div = document.createElement('div');
+    div.className = 'upgrade';
+    const bought = !!state.purchased[def.id];
+    const unlockThreshold = def.cost * 1.3;
+    const unlocked = state.crystals >= unlockThreshold;
+
+    if (!unlocked || bought) div.classList.add('locked');
+
+    const parts = [];
+    if (def.click) parts.push('+' + def.click + '/click');
+    if (def.passive) parts.push('+' + def.passive + '/sec');
+
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700">${def.name}${bought ? ' • BOUGHT' : ''}</div>
+        <div style="font-size:13px;color:var(--teal)">${def.cost.toLocaleString()}</div>
+      </div>
+      <div class="meta">${parts.join(' · ') || '--'}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.75)">
+        Unlocks at ${Math.ceil(unlockThreshold).toLocaleString()} crystals
+      </div>
+    `;
+
+    if (unlocked && !bought) {
+      div.classList.add('buy');
+      div.tabIndex = 0;
+      div.setAttribute('role', 'button');
+      div.setAttribute('aria-pressed', 'false');
+      div.addEventListener('click', () => tryBuy(def));
+      div.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') tryBuy(def);
+      });
+    } else {
+      div.tabIndex = -1;
+    }
+
+    elUpgrades.appendChild(div);
+  }
+}
+</script>
 </body>
 </html>
-
-
-
-
-
-
